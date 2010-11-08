@@ -1,0 +1,4 @@
+name = Platform Delete Sites
+description = Delete all sites on a platform
+core = 6.x
+package = Utilities

@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ *  Tried using hook_hosting_tasks() to extend platform tasks but couldn't
+ *  get it to work. No time to dig in the code.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function platform_delete_sites_menu() {
+  return array(
+    'node/%node/disable_sites' => array(
+      'title'                   => 'No turning back...',
+      'page callback'           => 'platform_delete_sites_execute_disable',
+      'page arguments'          => array(1),
+      'access arguments'        => array('administer nodes'),
+    ),
+    'node/%node/delete_sites' => array(
+      'title'                   => 'No turning back...',
+      'page callback'           => 'platform_delete_sites_execute_delete',
+      'page arguments'          => array(1),
+      'access arguments'        => array('administer nodes'),
+    ),
+  );
+}
+
+/**
+ * Spawn disable tasks for all sites on selected platform
+ */
+function platform_delete_sites_execute_disable($node) {
+  // Get all non disabled sites and spawn disable tasks for all of them
+  $enabled_sites = db_query("SELECT nid FROM {hosting_site}
+    WHERE platform = %d AND status = 1", array(':platform' => $node->nid));
+  while ($site = db_fetch_object($enabled_sites)) {
+    hosting_add_task($site->nid, 'disable');
+  }
+
+  drupal_goto('<front>');
+}
+
+/**
+ * Spawn disable tasks for all sites on selected platform
+ */
+function platform_delete_sites_execute_delete($node) {
+  // Get all disabled sites and spawn delete tasks for all of them
+  $enabled_sites = db_query("SELECT nid FROM {hosting_site}
+    WHERE platform = %d AND status = 0", array(':platform' => $node->nid));
+  while ($site = db_fetch_object($enabled_sites)) {
+    hosting_add_task($site->nid, 'delete');
+  }
+
+  drupal_goto('<front>');
+}
