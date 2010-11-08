@@ -64,19 +64,6 @@ function platform_delete_sites_execute_delete($node) {
  * Delete all sites the ugly way
  */
 function platform_delete_sites_execute_delete_hard($platform) {
-  return confirm_form(
-      array('#node' => $platform),
-      'Delete all sites?',
-      '<front>',
-      'Cannot be undone. EVVAH!',
-      'Do it!',
-      'Cancel'
-    );
-}
-
-function platform_delete_sites_execute_delete_hard_submit($form, $form_state) {
-  $platform = $form['#node'];
-
   $batch = array(
     'title'             => 'Deleting a crap load of sites',
     'operations'        => array(),
@@ -95,6 +82,7 @@ function platform_delete_sites_execute_delete_hard_submit($form, $form_state) {
 
   // Tip the first domino.
   batch_set($batch);
+  batch_process();
 }
 
 function platform_delete_sites_site($nid) {
