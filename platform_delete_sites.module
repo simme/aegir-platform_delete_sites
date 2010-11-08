@@ -23,6 +23,12 @@ function platform_delete_sites_menu() {
       'page arguments'          => array(1),
       'access arguments'        => array('administer nodes'),
     ),
+    'node/%node/delete_hard' => array(
+      'title'                   => 'No turning back...',
+      'page callback'           => 'platform_delete_sites_execute_delete_hard',
+      'page arguments'          => array(1),
+      'access arguments'        => array('administer nodes'),
+    ),
   );
 }
 
@@ -52,4 +58,32 @@ function platform_delete_sites_execute_delete($node) {
   }
 
   drupal_goto('<front>');
+}
+
+/**
+ * Delete all sites the ugly way
+ */
+function platform_delete_sites_execute_delete_hard($platform) {
+  $batch = array(
+    'title'             => 'Deleting a crap load of sites',
+    'operations'        => array(),
+    'finished'          => 'platform_delete_sites_execute',
+    'init_message'      => 'Warming up the engines',
+    'progress_message'  => 'Deleted @current of @total sites.',
+    'error_message'     => 'Ooops.. :/',
+  );
+
+  $sites = db_query("SELECT nid FROM {hosting_site}
+    WHERE platform = %d", array(':platform' => $platform->nid));
+
+  while ($site = db_fetch_object($sites)) {
+    $batch['operations'][] = array('platform_delete_sites_site', array($site->nid));
+  }
+
+  // Tip the first domino.
+  batch_set($batch);
+}
+
+function platform_delete_sites_site($nid) {
+  node_delete($nid);
 }
